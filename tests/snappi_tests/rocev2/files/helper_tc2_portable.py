@@ -228,7 +228,7 @@ def override_rocev2_qp_verb(config, tx_port_id, qp_index, verb_choice, **verb_kw
     pytest_assert(False, f"override_rocev2_qp_verb: flow {flow_name} not found on {target_port_name}")
 
 
-def make_scale_qp_configs(num_endpoints, dscp, message_size_kb, qp_num_base=100):
+def make_scale_qp_configs(num_endpoints, dscp, message_size_kb, qp_num_base=100, extra_qp_fields=None):
     """
     Generate `num_endpoints` qp_configs entries on one DSCP/queue, for the
     test plan's "increase number of endpoints per port to 4K for testing T2"
@@ -243,7 +243,7 @@ def make_scale_qp_configs(num_endpoints, dscp, message_size_kb, qp_num_base=100)
     too slow at full 4K scale, consider chunking or a lower first-pass count
     (e.g. 256/1024) while validating the mechanism.
     """
-    return [
-        {"qp_num": qp_num_base + i, "dscp": dscp, "message_size_unit": "kb", "message_size": message_size_kb}
-        for i in range(num_endpoints)
-    ]
+    base = {"qp_num": 0, "dscp": dscp, "message_size_unit": "kb", "message_size": message_size_kb}
+    if extra_qp_fields:
+        base.update(extra_qp_fields)
+    return [{**base, "qp_num": qp_num_base + i} for i in range(num_endpoints)]
